@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreContactRequest;
 use App\Http\Requests\UpdateContactRequest;
 use App\Models\Contact;
+use App\Rules\CpfValidation;
+use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
@@ -13,15 +15,27 @@ class ContactController extends Controller
      */
     public function index()
     {
-        //
+        Contact::all();
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreContactRequest $request)
+    public function store(Request $request)
     {
-        //
+        $fields = $request->validate([
+            'name' => 'required|max:255',
+            'cpf' => ['required', new CpfValidation()],
+            /*
+            'phone' => 'required',
+            'cep' => 'required',
+            'uf' => 'required',
+            'cidade' => 'required',
+            'bairro' => 'required',
+            'numero' => 'required',
+            'complemento' => 'nullable',
+            */
+        ]);
     }
 
     /**
@@ -35,7 +49,7 @@ class ContactController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateContactRequest $request, Contact $contact)
+    public function update(Request $request, Contact $contact)
     {
         //
     }
