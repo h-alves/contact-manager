@@ -6,6 +6,7 @@ use App\Http\Requests\StoreContactRequest;
 use App\Http\Requests\UpdateContactRequest;
 use App\Models\Contact;
 use App\Rules\CpfValidation;
+use App\Services\GoogleGeocodingService;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
@@ -26,16 +27,30 @@ class ContactController extends Controller
         $fields = $request->validate([
             'name' => 'required|max:255',
             'cpf' => ['required', new CpfValidation()],
-            /*
             'phone' => 'required',
             'cep' => 'required',
             'uf' => 'required',
             'cidade' => 'required',
             'bairro' => 'required',
+            'rua' => 'required',
             'numero' => 'required',
             'complemento' => 'nullable',
-            */
         ]);
+
+        $fullAddress = "{$fields['rua']}, {$fields['numero']}, {$fields['bairro']}, {$fields['cidade']}, {$fields['uf']}, {$fields['cep']}";
+
+        $geocodingService = new GoogleGeocodingService();
+
+        $coordinates = $geocodingService->getCoordinates($fullAddress);
+
+        if (!$coordinates) {
+            return "erro";
+        }
+
+        return [
+            'latitude' => $coordinates['latitude'],
+            'longitude' => $coordinates['longitude'],
+        ];
     }
 
     /**
