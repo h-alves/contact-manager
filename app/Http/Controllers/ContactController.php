@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreContactRequest;
-use App\Http\Requests\UpdateContactRequest;
 use App\Models\Address;
 use App\Models\Contact;
 use App\Rules\CpfValidation;
@@ -86,7 +84,7 @@ class ContactController extends Controller
      */
     public function show(Contact $contact)
     {
-        //
+        return $contact;
     }
 
     /**
@@ -94,7 +92,51 @@ class ContactController extends Controller
      */
     public function update(Request $request, Contact $contact)
     {
-        //
+        $fields = $request->validate([
+            'name' => 'required|max:255',
+            'cpf' => ['required', new CpfValidation()],
+            'phone' => 'required',
+            'cep' => 'required',
+            'uf' => 'required',
+            'cidade' => 'required',
+            'bairro' => 'required',
+            'rua' => 'required',
+            'numero' => 'required',
+            'complemento' => 'nullable',
+        ]);
+
+        $fullAddress = "{$fields['rua']}, {$fields['numero']}, {$fields['bairro']}, {$fields['cidade']}, {$fields['uf']}, {$fields['cep']}";
+
+        $geocodingService = new GoogleGeocodingService();
+
+        $coordinates = $geocodingService->getCoordinates($fullAddress);
+
+        if (!$coordinates) {
+            return response()->json(['error' => 'Não foi possível obter as coordenadas para o endereço fornecido.'], 400);
+        }
+
+        $address = $contact->address()->update([
+            'cep' => $fields['cep'],
+            'uf' => $fields['uf'],
+            'cidade' => $fields['cidade'],
+            'bairro' => $fields['bairro'],
+            'rua' => $fields['rua'],
+            'numero' => $fields['numero'],
+            'complemento' => $fields['complemento'] ?? null,
+            'latitude' => $coordinates['latitude'],
+            'longitude' => $coordinates['longitude'],
+        ]);
+
+        $contact->update([
+            'name' => $fields['name'],
+            'cpf' => $fields['cpf'],
+            'phone' => $fields['phone'],
+        ]);
+
+        return response()->json([
+            'contact' => $contact,
+            'address' => $address,
+        ], 200);
     }
 
     /**
@@ -102,6 +144,7 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact)
     {
-        //
+        $contact->address()->delete();
+        $contact->delete();
     }
 }
