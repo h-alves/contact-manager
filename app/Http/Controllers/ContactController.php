@@ -20,7 +20,8 @@ class ContactController extends Controller
      */
     public function index()
     {
-        Contact::all();
+        $contacts = Contact::with('address')->get();
+        return response()->json($contacts, 200);
     }
 
     /**
@@ -70,7 +71,8 @@ class ContactController extends Controller
      */
     public function show(Contact $contact)
     {
-        return $contact;
+        $contact->load('address');
+        return response()->json($contact, 200);
     }
 
     /**
