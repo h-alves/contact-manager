@@ -5,11 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use App\Models\Contact;
 use App\Rules\CpfValidation;
-use App\Services\GoogleGeocodingService;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
+    private $addressController;
+
+    public function __construct() {
+        $this->addressController = new AddressController();
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -36,27 +41,8 @@ class ContactController extends Controller
             'complemento' => 'nullable',
         ]);
 
-        $fullAddress = "{$fields['rua']}, {$fields['numero']}, {$fields['bairro']}, {$fields['cidade']}, {$fields['uf']}, {$fields['cep']}";
-
-        $geocodingService = new GoogleGeocodingService();
-
-        $coordinates = $geocodingService->getCoordinates($fullAddress);
-
-        if (!$coordinates) {
-            return response()->json(['error' => 'Não foi possível obter as coordenadas para o endereço fornecido.'], 400);
-        }
-
-        $address = Address::create([
-            'cep' => $fields['cep'],
-            'uf' => $fields['uf'],
-            'cidade' => $fields['cidade'],
-            'bairro' => $fields['bairro'],
-            'rua' => $fields['rua'],
-            'numero' => $fields['numero'],
-            'complemento' => $fields['complemento'] ?? null,
-            'latitude' => $coordinates['latitude'],
-            'longitude' => $coordinates['longitude'],
-        ]);
+        $addressResponse = $this->addressController->store($request);
+        $address = json_decode($addressResponse->getContent());
 
         if (!$address) {
             return response()->json(['error' => 'Não foi possível registrar o endereço fornecido.'], 400);
@@ -105,27 +91,8 @@ class ContactController extends Controller
             'complemento' => 'nullable',
         ]);
 
-        $fullAddress = "{$fields['rua']}, {$fields['numero']}, {$fields['bairro']}, {$fields['cidade']}, {$fields['uf']}, {$fields['cep']}";
-
-        $geocodingService = new GoogleGeocodingService();
-
-        $coordinates = $geocodingService->getCoordinates($fullAddress);
-
-        if (!$coordinates) {
-            return response()->json(['error' => 'Não foi possível obter as coordenadas para o endereço fornecido.'], 400);
-        }
-
-        $address = $contact->address()->update([
-            'cep' => $fields['cep'],
-            'uf' => $fields['uf'],
-            'cidade' => $fields['cidade'],
-            'bairro' => $fields['bairro'],
-            'rua' => $fields['rua'],
-            'numero' => $fields['numero'],
-            'complemento' => $fields['complemento'] ?? null,
-            'latitude' => $coordinates['latitude'],
-            'longitude' => $coordinates['longitude'],
-        ]);
+        $addressResponse = $this->addressController->update($request, $contact->address());
+        $address = json_decode($addressResponse->getContent());
 
         $contact->update([
             'name' => $fields['name'],
@@ -144,7 +111,9 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact)
     {
-        $contact->address()->delete();
+        $this->addressController->destroy($contact->address());
+
         $contact->delete();
+        return response()->json(['message' => 'Contato excluído com sucesso.'], 200);
     }
 }
