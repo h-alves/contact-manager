@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreContactRequest;
 use App\Http\Requests\UpdateContactRequest;
+use App\Models\Address;
 use App\Models\Contact;
 use App\Rules\CpfValidation;
 use App\Services\GoogleGeocodingService;
@@ -44,13 +45,40 @@ class ContactController extends Controller
         $coordinates = $geocodingService->getCoordinates($fullAddress);
 
         if (!$coordinates) {
-            return "erro";
+            return response()->json(['error' => 'Não foi possível obter as coordenadas para o endereço fornecido.'], 400);
         }
 
-        return [
+        $address = Address::create([
+            'cep' => $fields['cep'],
+            'uf' => $fields['uf'],
+            'cidade' => $fields['cidade'],
+            'bairro' => $fields['bairro'],
+            'rua' => $fields['rua'],
+            'numero' => $fields['numero'],
+            'complemento' => $fields['complemento'] ?? null,
             'latitude' => $coordinates['latitude'],
             'longitude' => $coordinates['longitude'],
-        ];
+        ]);
+
+        if (!$address) {
+            return response()->json(['error' => 'Não foi possível registrar o endereço fornecido.'], 400);
+        }
+
+        $contact = request()->user()->contacts()->create([
+            'name' => $fields['name'],
+            'cpf' => $fields['cpf'],
+            'phone' => $fields['phone'],
+            'address_id' => $address->id,
+        ]);
+
+        if (!$contact) {
+            return response()->json(['error' => 'Não foi possível registrar o contato fornecido.'], 400);
+        }
+
+        return response()->json([
+            'contact' => $contact,
+            'address' => $address,
+        ], 201);
     }
 
     /**

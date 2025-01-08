@@ -47,7 +47,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function contact() {
+    public function contacts() {
         return $this->hasMany(Contact::class);
     }
 }

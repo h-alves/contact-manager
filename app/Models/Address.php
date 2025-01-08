@@ -12,7 +12,7 @@ class Address extends Model
 
     protected $fillable = ['cep', 'uf', 'cidade', 'bairro', 'rua', 'numero', 'complemento', 'latitude', 'longitude'];
 
-    public function contact() {
+    public function contacts() {
         return $this->hasMany(Contact::class);
     }
 }
