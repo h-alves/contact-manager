@@ -17,4 +17,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::post('password/reset', [PasswordResetController::class, 'resetPassword'])->name('password.reset');
 
+Route::post('/deleteAccount', [AuthController::class, 'deleteAccount'])->middleware('auth:sanctum');
+
 Route::apiResource('/contact', ContactController::class)->middleware('auth:sanctum');

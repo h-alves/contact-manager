@@ -50,4 +50,15 @@ class User extends Authenticatable
     public function contacts() {
         return $this->hasMany(Contact::class);
     }
+
+    public static function boot() {
+        parent::boot();
+
+        static::deleting(function ($user) {
+            $user->contacts()->each(function ($contact) {
+                $contact->address()->delete();
+                $contact->delete();
+            });
+        });
+    }
 }

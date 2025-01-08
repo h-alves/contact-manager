@@ -51,6 +51,14 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request) {
+        $request->user()->tokens()->delete();
+
+        return [
+            'message' => 'You have been logged out.',
+        ];
+    }
+
+    public function deleteAccount(Request $request) {
         $request->validate([
             'password' => 'required',
         ]);
@@ -60,15 +68,11 @@ class AuthController extends Controller
         if (!Hash::check($request->password, $user->password)) {
             return [
                 'errors' => [
-                    'password' => ['The provided credentials are incorrect.']
+                    'password' => ['Senha incorreta.']
                 ]
             ];
         }
 
-        $request->user()->tokens()->delete();
-
-        return [
-            'message' => 'You have been logged out.',
-        ];
+        $user->delete();
     }
 }
