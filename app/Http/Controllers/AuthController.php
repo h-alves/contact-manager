@@ -35,19 +35,19 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return [
+            return response()->json([
                 'errors' => [
                     'email' => ['The provided credentials are incorrect.']
                 ]
-            ];
+            ], 422);
         }
 
         $token = $user->createToken($user->name);
 
-        return [
+        return response()->json([
             'user' => $user,
             'token' => $token->plainTextToken,
-        ];
+        ], status: 200);
     }
 
     public function logout(Request $request) {
@@ -66,13 +66,16 @@ class AuthController extends Controller
         $user = $request->user();
 
         if (!Hash::check($request->password, $user->password)) {
-            return [
+            return response()->json([
                 'errors' => [
                     'password' => ['Senha incorreta.']
                 ]
-            ];
+            ], 422);
         }
 
         $user->delete();
+        return response()->json([
+            'message' => 'You have been logged out.'
+        ], 200);
     }
 }
