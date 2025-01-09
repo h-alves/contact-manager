@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use App\Services\GoogleGeocodingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class AddressController extends Controller
 {
@@ -111,5 +112,37 @@ class AddressController extends Controller
     {
         $address->delete();
         return response()->json(['message' => 'Endereço excluído com sucesso.'], 200);
+    }
+
+    public function search(Request $request) {
+        $request->validate([
+            'uf' => 'required',
+            'cidade' => 'required',
+            'endereco' => 'nullable',
+        ]);
+
+        $uf = $request->get('uf');
+        $cidade = $request->get('cidade');
+        $endereco = $request->get('endereco');
+
+        $apiUrl = "https://viacep.com.br/ws/{$uf}/{$cidade}/{$endereco}/json/";
+
+        $response = Http::get($apiUrl);
+
+        if ($response->failed()) {
+            return response()->json([
+                'message' => 'Não foi possível buscar os endereços no momento.',
+            ], 500);
+        }
+
+        $data = $response->json();
+
+        if (empty($data)) {
+            return response()->json([
+                'message' => 'Nenhum endereço encontrado.',
+            ], 404);
+        }
+
+        return response()->json($data, 200);
     }
 }
