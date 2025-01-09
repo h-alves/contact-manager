@@ -26,13 +26,13 @@ class UpdateContactRequest extends FormRequest
             'name' => 'sometimes|max:255',
             'cpf' => ['sometimes', 'unique:contacts,cpf,' . $this->contact->id, new CpfValidation()],
             'phone' => 'sometimes',
-            'cep' => 'sometimes',
-            'uf' => 'sometimes',
-            'cidade' => 'sometimes',
-            'bairro' => 'sometimes',
-            'rua' => 'sometimes',
-            'numero' => 'sometimes',
-            'complemento' => 'nullable',
+            'postal_code' => 'sometimes',
+            'state' => 'sometimes',
+            'city' => 'sometimes',
+            'neighborhood' => 'sometimes',
+            'street' => 'sometimes',
+            'number' => 'sometimes',
+            'complement' => 'nullable',
         ];
     }
 }

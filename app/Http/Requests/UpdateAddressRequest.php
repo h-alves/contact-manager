@@ -22,13 +22,14 @@ class UpdateAddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cep' => 'sometimes|required',
-            'uf' => 'sometimes|required',
-            'cidade' => 'sometimes|required',
-            'bairro' => 'sometimes|required',
-            'rua' => 'sometimes|required',
-            'numero' => 'sometimes|required',
-            'complemento' => 'nullable',
+            'postal_code' => 'sometimes|required',
+            'state' => 'sometimes|required',
+            'city' => 'sometimes|required',
+            'neighborhood' => 'sometimes|required',
+            'street' => 'sometimes|required',
+            'number' => 'sometimes|required',
+            'complement' => 'nullable',
         ];
+
     }
 }

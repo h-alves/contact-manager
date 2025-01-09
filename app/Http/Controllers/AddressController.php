@@ -32,13 +32,13 @@ class AddressController extends Controller
         }
 
         $address = Address::create([
-            'cep' => $fields['cep'],
-            'uf' => $fields['uf'],
-            'cidade' => $fields['cidade'],
-            'bairro' => $fields['bairro'],
-            'rua' => $fields['rua'],
-            'numero' => $fields['numero'],
-            'complemento' => $fields['complemento'] ?? null,
+            'postal_code' => $fields['postal_code'],
+            'state' => $fields['state'],
+            'city' => $fields['city'],
+            'neighborhood' => $fields['neighborhood'],
+            'street' => $fields['street'],
+            'number' => $fields['number'],
+            'complement' => $fields['complement'] ?? null,
             'latitude' => $coordinates['latitude'],
             'longitude' => $coordinates['longitude'],
         ]);
@@ -84,16 +84,16 @@ class AddressController extends Controller
 
     public function search(Request $request) {
         $request->validate([
-            'uf' => 'required',
-            'cidade' => 'required',
-            'endereco' => 'nullable',
+            'state' => 'required',
+            'city' => 'required',
+            'address' => 'nullable',
         ]);
 
-        $uf = $request->get('uf');
-        $cidade = $request->get('cidade');
-        $endereco = $request->get('endereco');
+        $state = $request->get('state');
+        $city = $request->get('city');
+        $address = $request->get('address');
 
-        $apiUrl = "https://viacep.com.br/ws/{$uf}/{$cidade}/{$endereco}/json/";
+        $apiUrl = "https://viacep.com.br/ws/{$state}/{$city}/{$address}/json/";
 
         $response = Http::get($apiUrl);
 
@@ -116,14 +116,14 @@ class AddressController extends Controller
 
     private function generateFullAddress(array $fields): string
     {
-        $rua = $fields['rua'] ?? '';
-        $numero = $fields['numero'] ?? '';
-        $bairro = $fields['bairro'] ?? '';
-        $cidade = $fields['cidade'] ?? '';
-        $uf = $fields['uf'] ?? '';
-        $cep = $fields['cep'] ?? '';
+        $street = $fields['street'] ?? '';
+        $number = $fields['number'] ?? '';
+        $neighborhood = $fields['neighborhood'] ?? '';
+        $city = $fields['city'] ?? '';
+        $state = $fields['state'] ?? '';
+        $postal_code = $fields['postal_code'] ?? '';
 
-        return trim("{$rua}, {$numero}, {$bairro}, {$cidade}, {$uf}, {$cep}");
+        return trim("{$street}, {$number}, {$neighborhood}, {$city}, {$state}, {$postal_code}");
     }
 
     private function getCoordinatesFromAddress(string $fullAddress): ?array

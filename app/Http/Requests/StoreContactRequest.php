@@ -26,13 +26,13 @@ class StoreContactRequest extends FormRequest
             'name' => 'required|max:255',
             'cpf' => ['required', 'unique:contacts,cpf', new CpfValidation()],
             'phone' => 'required',
-            'cep' => 'required',
-            'uf' => 'required',
-            'cidade' => 'required',
-            'bairro' => 'required',
-            'rua' => 'required',
-            'numero' => 'required',
-            'complemento' => 'nullable',
+            'postal_code' => 'required',
+            'state' => 'required',
+            'city' => 'required',
+            'neighborhood' => 'required',
+            'street' => 'required',
+            'number' => 'required',
+            'complement' => 'nullable',
         ];
     }
 }

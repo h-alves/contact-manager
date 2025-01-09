@@ -70,7 +70,7 @@ class ContactController extends Controller
     {
         $fields = $request->validated();
 
-        if ($request->hasAny(['cep', 'uf', 'cidade', 'bairro', 'rua', 'numero', 'complemento'])) {
+        if ($request->hasAny(['postal_code', 'state', 'city', 'neighborhood', 'street', 'number', 'complement'])) {
             $addressResponse = $this->addressController->update($request, $contact->address);
             $address = json_decode($addressResponse->getContent());
         }
