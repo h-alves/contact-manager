@@ -91,7 +91,7 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJson([
                 'errors' => [
-                    'email' => ['The provided credentials are incorrect.'],
+                    'email' => ['As informações estão incorretas.'],
                 ],
             ]);
     }
@@ -122,7 +122,7 @@ class AuthControllerTest extends TestCase
         $response = $this->withToken($token)->postJson('/api/logout');
 
         $response->assertStatus(200)
-            ->assertJson(['message' => 'You have been logged out.']);
+            ->assertJson(['message' => 'Você está deslogado com sucesso!']);
     }
 
     public function test_user_cannot_logout_without_authentication()

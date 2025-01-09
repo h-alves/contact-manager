@@ -3,18 +3,17 @@
 namespace App\Http\Controllers;
 
 
+use App\Http\Requests\DeleteAccountRequest;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request) {
-        $fields = $request->validate([
-            'name' => 'required|max:255',
-            'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|confirmed|min:8',
-        ]);
+    public function register(RegisterRequest $request) {
+        $fields = $request->validated();
 
         $user = User::create($fields);
 
@@ -26,18 +25,13 @@ class AuthController extends Controller
         ], status: 201);
     }
 
-    public function login(Request $request) {
-        $request->validate([
-            'email' => 'required|email|exists:users',
-            'password' => 'required',
-        ]);
-
+    public function login(LoginRequest $request) {
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'errors' => [
-                    'email' => ['The provided credentials are incorrect.']
+                    'email' => ['As informações estão incorretas.'],
                 ]
             ], 422);
         }
@@ -54,15 +48,11 @@ class AuthController extends Controller
         $request->user()->tokens()->delete();
 
         return [
-            'message' => 'You have been logged out.',
+            'message' => 'Você está deslogado com sucesso!',
         ];
     }
 
-    public function deleteAccount(Request $request) {
-        $request->validate([
-            'password' => 'required',
-        ]);
-
+    public function deleteAccount(DeleteAccountRequest $request) {
         $user = $request->user();
 
         if (!Hash::check($request->password, $user->password)) {
@@ -75,7 +65,7 @@ class AuthController extends Controller
 
         $user->delete();
         return response()->json([
-            'message' => 'You have been logged out.'
+            'message' => 'Sua conta foi deletada com sucesso!'
         ], 200);
     }
 }
