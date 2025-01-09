@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Address;
+use App\Http\Requests\StoreContactRequest;
+use App\Http\Requests\UpdateContactRequest;
 use App\Models\Contact;
-use App\Rules\CpfValidation;
-use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-    private $addressController;
+    private AddressController $addressController;
 
     public function __construct() {
         $this->addressController = new AddressController();
@@ -27,20 +26,9 @@ class ContactController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreContactRequest $request)
     {
-        $fields = $request->validate([
-            'name' => 'required|max:255',
-            'cpf' => ['required', 'unique:contacts,cpf', new CpfValidation()],
-            'phone' => 'required',
-            'cep' => 'required',
-            'uf' => 'required',
-            'cidade' => 'required',
-            'bairro' => 'required',
-            'rua' => 'required',
-            'numero' => 'required',
-            'complemento' => 'nullable',
-        ]);
+        $fields = $request->validated();
 
         $addressResponse = $this->addressController->store($request);
         $address = json_decode($addressResponse->getContent());
@@ -78,33 +66,20 @@ class ContactController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Contact $contact)
+    public function update(UpdateContactRequest $request, Contact $contact)
     {
-        $fields = $request->validate([
-            'name' => 'required|max:255',
-            'cpf' => ['required', 'unique:contacts,cpf', new CpfValidation()],
-            'phone' => 'required',
-            'cep' => 'required',
-            'uf' => 'required',
-            'cidade' => 'required',
-            'bairro' => 'required',
-            'rua' => 'required',
-            'numero' => 'required',
-            'complemento' => 'nullable',
-        ]);
+        $fields = $request->validated();
 
-        $addressResponse = $this->addressController->update($request, $contact->address());
-        $address = json_decode($addressResponse->getContent());
+        if ($request->hasAny(['cep', 'uf', 'cidade', 'bairro', 'rua', 'numero', 'complemento'])) {
+            $addressResponse = $this->addressController->update($request, $contact->address);
+            $address = json_decode($addressResponse->getContent());
+        }
 
-        $contact->update([
-            'name' => $fields['name'],
-            'cpf' => $fields['cpf'],
-            'phone' => $fields['phone'],
-        ]);
+        $contact->update($fields);
 
         return response()->json([
             'contact' => $contact,
-            'address' => $address,
+            'address' => $address ?? $contact->address,
         ], 200);
     }
 
@@ -113,7 +88,7 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact)
     {
-        $this->addressController->destroy($contact->address());
+        $this->addressController->destroy($contact->address);
 
         $contact->delete();
         return response()->json(['message' => 'Contato excluído com sucesso.'], 200);

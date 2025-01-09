@@ -11,7 +11,7 @@ class StoreAddressRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,13 @@ class StoreAddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'cep' => 'required',
+            'uf' => 'required',
+            'cidade' => 'required',
+            'bairro' => 'required',
+            'rua' => 'required',
+            'numero' => 'required',
+            'complemento' => 'nullable',
         ];
     }
 }

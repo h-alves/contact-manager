@@ -22,21 +22,10 @@ class AddressController extends Controller
      */
     public function store(Request $request)
     {
-        $fields = $request->validate([
-            'cep' => 'required',
-            'uf' => 'required',
-            'cidade' => 'required',
-            'bairro' => 'required',
-            'rua' => 'required',
-            'numero' => 'required',
-            'complemento' => 'nullable',
-        ]);
+        $fields = $request->validated();
 
-        $fullAddress = "{$fields['rua']}, {$fields['numero']}, {$fields['bairro']}, {$fields['cidade']}, {$fields['uf']}, {$fields['cep']}";
-
-        $geocodingService = new GoogleGeocodingService();
-
-        $coordinates = $geocodingService->getCoordinates($fullAddress);
+        $fullAddress = $this->generateFullAddress($fields);
+        $coordinates = $this->getCoordinatesFromAddress($fullAddress);
 
         if (!$coordinates) {
             return response()->json(['error' => 'Não foi possível obter as coordenadas para o endereço fornecido.'], 400);
@@ -70,37 +59,16 @@ class AddressController extends Controller
      */
     public function update(Request $request, Address $address)
     {
-        $fields = $request->validate([
-            'cep' => 'required',
-            'uf' => 'required',
-            'cidade' => 'required',
-            'bairro' => 'required',
-            'rua' => 'required',
-            'numero' => 'required',
-            'complemento' => 'nullable',
-        ]);
+        $fields = $request->validated();
 
-        $fullAddress = "{$fields['rua']}, {$fields['numero']}, {$fields['bairro']}, {$fields['cidade']}, {$fields['uf']}, {$fields['cep']}";
-
-        $geocodingService = new GoogleGeocodingService();
-
-        $coordinates = $geocodingService->getCoordinates($fullAddress);
+        $fullAddress = $this->generateFullAddress($fields);
+        $coordinates = $this->getCoordinatesFromAddress($fullAddress);
 
         if (!$coordinates) {
             return response()->json(['error' => 'Não foi possível obter as coordenadas para o endereço fornecido.'], 400);
         }
 
-        $address->update([
-            'cep' => $fields['cep'],
-            'uf' => $fields['uf'],
-            'cidade' => $fields['cidade'],
-            'bairro' => $fields['bairro'],
-            'rua' => $fields['rua'],
-            'numero' => $fields['numero'],
-            'complemento' => $fields['complemento'] ?? null,
-            'latitude' => $coordinates['latitude'],
-            'longitude' => $coordinates['longitude'],
-        ]);
+        $address->update($fields);
 
         return response()->json($address, 200);
     }
@@ -144,5 +112,29 @@ class AddressController extends Controller
         }
 
         return response()->json($data, 200);
+    }
+
+    private function generateFullAddress(array $fields): string
+    {
+        $rua = $fields['rua'] ?? '';
+        $numero = $fields['numero'] ?? '';
+        $bairro = $fields['bairro'] ?? '';
+        $cidade = $fields['cidade'] ?? '';
+        $uf = $fields['uf'] ?? '';
+        $cep = $fields['cep'] ?? '';
+
+        return trim("{$rua}, {$numero}, {$bairro}, {$cidade}, {$uf}, {$cep}");
+    }
+
+    private function getCoordinatesFromAddress(string $fullAddress): ?array
+    {
+        $geocodingService = new GoogleGeocodingService();
+        $coordinates = $geocodingService->getCoordinates($fullAddress);
+
+        if (!$coordinates) {
+            return null;
+        }
+
+        return $coordinates;
     }
 }

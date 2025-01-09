@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\CpfValidation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreContactRequest extends FormRequest
@@ -11,7 +12,7 @@ class StoreContactRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,16 @@ class StoreContactRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|max:255',
+            'cpf' => ['required', 'unique:contacts,cpf', new CpfValidation()],
+            'phone' => 'required',
+            'cep' => 'required',
+            'uf' => 'required',
+            'cidade' => 'required',
+            'bairro' => 'required',
+            'rua' => 'required',
+            'numero' => 'required',
+            'complemento' => 'nullable',
         ];
     }
 }

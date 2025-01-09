@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\CpfValidation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateContactRequest extends FormRequest
@@ -11,7 +12,7 @@ class UpdateContactRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,16 @@ class UpdateContactRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'sometimes|max:255',
+            'cpf' => ['sometimes', 'unique:contacts,cpf,' . $this->contact->id, new CpfValidation()],
+            'phone' => 'sometimes',
+            'cep' => 'sometimes',
+            'uf' => 'sometimes',
+            'cidade' => 'sometimes',
+            'bairro' => 'sometimes',
+            'rua' => 'sometimes',
+            'numero' => 'sometimes',
+            'complemento' => 'nullable',
         ];
     }
 }

@@ -16,7 +16,7 @@ class CpfValidation implements ValidationRule
     {
         $value = preg_replace('/[^0-9]/', '', $value);
 
-        if ($this->hasElevenCharacters($value)) {
+        if (!$this->hasElevenCharacters($value)) {
             $fail("O campo {$attribute} deve ter 11 caracteres");
         }
 
@@ -24,7 +24,7 @@ class CpfValidation implements ValidationRule
             $fail("O campo {$attribute} deve ser válido");
         }
 
-        if ($this->hasIncorrectDigits($value)) {
+        if (!$this->hasCorrectDigits($value)) {
             $fail("O campo {$attribute} deve ser válido");
         }
     }
@@ -36,7 +36,7 @@ class CpfValidation implements ValidationRule
 
     private function isSequence(string $value): bool
     {
-        return preg_match('/^\d{11}$/', $value);
+        return preg_match('/^\d1{10}$/', $value);
     }
 
     private function calculateFirstDigit($value): int
@@ -59,11 +59,11 @@ class CpfValidation implements ValidationRule
         return ($sum2 < 10) ? $sum2 : 0;
     }
 
-    private function hasIncorrectDigits($value): bool
+    private function hasCorrectDigits($value): bool
     {
         $firstDigit = $this->calculateFirstDigit($value);
         $secondDigit = $this->calculateSecondDigit($value);
 
-        return $firstDigit != $value[9] || $secondDigit != $value[10];
+        return $firstDigit == $value[9] || $secondDigit == $value[10];
     }
 }
