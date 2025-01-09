@@ -18,14 +18,17 @@ class CpfValidation implements ValidationRule
 
         if (!$this->hasElevenCharacters($value)) {
             $fail("O campo {$attribute} deve ter 11 caracteres");
+            return;
         }
 
         if ($this->isSequence($value)) {
             $fail("O campo {$attribute} deve ser válido");
+            return;
         }
 
         if (!$this->hasCorrectDigits($value)) {
-            $fail("O campo {$attribute} deve ser válido");
+            $fail("O campo {$attribute} deve possuir código de identificação válido");
+            return;
         }
     }
 
@@ -64,6 +67,6 @@ class CpfValidation implements ValidationRule
         $firstDigit = $this->calculateFirstDigit($value);
         $secondDigit = $this->calculateSecondDigit($value);
 
-        return $firstDigit == $value[9] || $secondDigit == $value[10];
+        return $firstDigit == $value[9] && $secondDigit == $value[10];
     }
 }
