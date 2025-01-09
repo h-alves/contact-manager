@@ -31,7 +31,7 @@ class ContactController extends Controller
     {
         $fields = $request->validate([
             'name' => 'required|max:255',
-            'cpf' => ['required', new CpfValidation()],
+            'cpf' => ['required', 'unique:contacts,cpf', new CpfValidation()],
             'phone' => 'required',
             'cep' => 'required',
             'uf' => 'required',
@@ -82,7 +82,7 @@ class ContactController extends Controller
     {
         $fields = $request->validate([
             'name' => 'required|max:255',
-            'cpf' => ['required', new CpfValidation()],
+            'cpf' => ['required', 'unique:contacts,cpf', new CpfValidation()],
             'phone' => 'required',
             'cep' => 'required',
             'uf' => 'required',
