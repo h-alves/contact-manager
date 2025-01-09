@@ -19,7 +19,7 @@ class ContactController extends Controller
      */
     public function index()
     {
-        $contacts = Contact::with('address')->get();
+        $contacts = Contact::with('address')->get()->where('user_id', auth()->id());
         return response()->json($contacts, 200);
     }
 
@@ -31,11 +31,11 @@ class ContactController extends Controller
         $fields = $request->validated();
 
         $addressResponse = $this->addressController->store($request);
-        $address = json_decode($addressResponse->getContent());
-
-        if (!$address) {
+        if ($addressResponse->getStatusCode() == 400) {
             return response()->json(['error' => 'Não foi possível registrar o endereço fornecido.'], 400);
         }
+
+        $address = json_decode($addressResponse->getContent());
 
         $contact = request()->user()->contacts()->create([
             'name' => $fields['name'],
@@ -59,6 +59,11 @@ class ContactController extends Controller
      */
     public function show(Contact $contact)
     {
+        if ($contact->user() !== auth()->user()) {
+            return response()->json([
+                'error' => 'Você não tem permissão de visualizar o contato.',
+            ], 403);
+        }
         $contact->load('address');
         return response()->json($contact, 200);
     }

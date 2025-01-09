@@ -28,7 +28,7 @@ class GoogleGeocodingServiceTest extends TestCase
 
         $googleGeocodingService = new GoogleGeocodingService();
         $coordinates = $googleGeocodingService->getCoordinates($address);
-        
+
         $this->assertNull($coordinates);
     }
 }
