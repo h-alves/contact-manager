@@ -47,7 +47,7 @@ class ContactControllerTest extends TestCase
             ->assertJsonStructure(['contact', 'address']);
     }
 
-    public function test_cannot_create_contact_invalid_address()
+    public function test_cannot_create_contact_with_invalid_address()
     {
         $user = User::factory()->create();
 
@@ -81,7 +81,7 @@ class ContactControllerTest extends TestCase
             ->assertJsonFragment(['name' => $contact->name]);
     }
 
-    public function test_cannot_show_contact_invalid_id()
+    public function test_cannot_show_contact_with_invalid_id()
     {
         $user = User::factory()->create();
         $contact = Contact::factory()->create(['user_id' => $user->id]);

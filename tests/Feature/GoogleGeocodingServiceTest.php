@@ -22,7 +22,7 @@ class GoogleGeocodingServiceTest extends TestCase
         $this->assertEquals(-49.2789859, $coordinates['longitude']);
     }
 
-    public function test_get_coordinates_returns_coordinates_when_response_is_not_ok()
+    public function test_get_coordinates_returns_null_when_response_is_not_ok()
     {
         $address = 'Endereço Inválido';
 

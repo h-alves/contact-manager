@@ -59,7 +59,7 @@ class ContactController extends Controller
      */
     public function show(Contact $contact)
     {
-        if ($contact->user() !== auth()->user()) {
+        if ($contact->user_id !== auth()->id()) {
             return response()->json([
                 'error' => 'Você não tem permissão de visualizar o contato.',
             ], 403);
