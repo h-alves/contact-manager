@@ -20,10 +20,10 @@ class AuthController extends Controller
 
         $token = $user->createToken($request->name);
 
-        return [
+        return response()->json([
             'user' => $user,
             'token' => $token->plainTextToken,
-        ];
+        ], status: 201);
     }
 
     public function login(Request $request) {
